@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Data Pelaksanaan Pelatihan - BPSDM</title>
+  
+  <!-- Google Fonts: Inter and Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for beautiful icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logos-wrapper">
+          <img src="logo-bpsdm.png" alt="Logo BPSDM DKI Jakarta" class="app-logo logo-bpsdm">
+          <img src="logo-jppc.png" alt="Logo Jakarta Public Policy Center" class="app-logo logo-jppc">
+        </div>
+        <div class="brand-text">
+          <h1>Master Data Pelatihan</h1>
+          <p>Pengembangan Kompetensi Pemerintahan dan Teknis</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div id="sync-status" class="sync-status-badge" style="display:none;">
+          <i class="fa-solid fa-circle-check" style="color:#10b981"></i>
+          <span id="sync-time-label">Tersinkronisasi</span>
+        </div>
+        <button id="btn-sync" class="btn btn-sync" title="Ambil ulang data terbaru dari Google Sheets">
+          <i class="fa-solid fa-arrows-rotate"></i> <span>Sync Sheets</span>
+        </button>
+        <div id="admin-status" class="admin-badge hidden">
+          <i class="fa-solid fa-user-shield"></i> Mode Admin Aktif
+        </div>
+        <button id="btn-login-toggle" class="btn btn-primary btn-login">
+          <i class="fa-solid fa-lock"></i> <span>Login Admin</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+    
+    <!-- Statistics Dashboard Dashboard -->
+    <section class="dashboard-stats">
+      <div class="stat-card card-blue">
+        <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+        <div class="stat-details">
+          <h3 id="stat-total-kegiatan">0</h3>
+          <p>Total Jenis Pelatihan</p>
+        </div>
+      </div>
+      
+      <div class="stat-card card-purple">
+        <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="stat-details">
+          <h3 id="stat-total-angkatan">0</h3>
+          <p>Total Rombel / Angkatan</p>
+        </div>
+      </div>
+      
+      <div class="stat-card card-green">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-details">
+          <h3 id="stat-total-peserta">0</h3>
+          <p>Total Partisipan Peserta</p>
+        </div>
+      </div>
+      
+      <div class="stat-card card-teal">
+        <div class="stat-icon"><i class="fa-solid fa-award"></i></div>
+        <div class="stat-details">
+          <h3 id="stat-kelulusan-rate">0%</h3>
+          <p>Rasio Kelulusan</p>
+        </div>
+      </div>
+      
+      <div class="stat-card card-orange">
+        <div class="stat-icon"><i class="fa-solid fa-file-shield"></i></div>
+        <div class="stat-details">
+          <h3 id="stat-dokumen-rate">0%</h3>
+          <p>Kelengkapan Dokumen</p>
+        </div>
+      </div>
+
+      <a href="https://docs.google.com/spreadsheets/d/1c_f5iC9NYf60dzwOPR-aH67dL-PDYJDFUbu10BMDmdE/edit?usp=sharing" target="_blank" class="stat-card card-red link-card" style="text-decoration: none; color: inherit;">
+        <div class="stat-icon"><i class="fa-regular fa-file-excel"></i></div>
+        <div class="stat-details">
+          <h3>Sinkron data</h3>
+          <p>Spreadsheet &amp; Jadwal <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem; margin-left: 2px;"></i></p>
+        </div>
+      </a>
+    </section>
+
+    <!-- Filters and Searches -->
+    <section class="filter-panel">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Cari nama pelatihan, pengajar, tempat...">
+      </div>
+      
+      <div class="filter-options">
+        <div class="filter-group">
+          <label for="filter-triwulan"><i class="fa-solid fa-calendar-quarter"></i> Triwulan</label>
+          <select id="filter-triwulan">
+            <option value="all">Semua Triwulan</option>
+            <option value="I">Triwulan I</option>
+            <option value="II">Triwulan II</option>
+            <option value="III">Triwulan III</option>
+            <option value="IV">Triwulan IV</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="filter-tahun"><i class="fa-solid fa-calendar"></i> Tahun</label>
+          <select id="filter-tahun">
+            <option value="all">Semua Tahun</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="filter-dokumen"><i class="fa-solid fa-file-circle-check"></i> Status Dokumen</label>
+          <select id="filter-dokumen">
+            <option value="all">Semua Status</option>
+            <option value="lengkap">Dokumen Lengkap (100%)</option>
+            <option value="belum">Ada Dokumen Kosong</option>
+          </select>
+        </div>
+        
+        <button id="btn-add-kegiatan" class="btn btn-success hidden">
+          <i class="fa-solid fa-plus"></i> Tambah Pelatihan
+        </button>
+        <button id="btn-manage-docs" class="btn btn-primary hidden">
+          <i class="fa-solid fa-file-pen"></i> Kelola Jenis Dokumen
+        </button>
+        <button id="btn-migrate-firebase" class="btn btn-warning hidden" onclick="migrateToFirebase()">
+          <i class="fa-solid fa-fire"></i> Migrasi ke Firebase
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Data List -->
+    <section class="data-table-section">
+      <div class="table-header-info">
+        <h2>Daftar Pelaksanaan Pelatihan</h2>
+        <span id="data-count-badge" class="count-badge">Menampilkan 0 data</span>
+      </div>
+      
+      <div class="table-responsive">
+        <table id="main-data-table" class="data-table">
+          <thead>
+            <tr>
+              <th width="60px">No.</th>
+              <th>Nama Kegiatan Pelatihan</th>
+              <th width="120px">Jml Angkatan</th>
+              <th width="160px">Rentang Triwulan</th>
+              <th width="100px">Tahun</th>
+              <th width="150px">Kelulusan Rata-rata</th>
+              <th width="120px">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="kegiatan-tbody">
+            <!-- Dynamic Content Loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="no-data-alert" class="no-data-alert hidden">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <p>Tidak ada data pelatihan yang cocok dengan filter pencarian Anda.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Detail Kegiatan -->
+  <div id="modal-detail" class="modal-overlay">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <div class="header-title-wrapper">
+          <span class="no-indicator" id="detail-no">#</span>
+          <h2 id="detail-title">Nama Kegiatan Pelatihan</h2>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-detail')">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Batches Tab Selection -->
+        <div class="angkatan-tabs-container">
+          <label><i class="fa-solid fa-layer-group"></i> Pilih Angkatan:</label>
+          <div class="tabs-list" id="angkatan-tabs">
+            <!-- Dynamic Tabs -->
+          </div>
+          <button id="btn-add-angkatan" class="btn btn-sm btn-outline-success hidden" style="margin-left: auto;">
+            <i class="fa-solid fa-plus"></i> Tambah Angkatan
+          </button>
+        </div>
+        
+        <!-- Batch Details Wrapper -->
+        <div id="angkatan-details-pane" class="details-pane">
+          <!-- Dynamically generated info of selected batch -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Login Admin -->
+  <div id="modal-login" class="modal-overlay">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2>Login Admin Portal</h2>
+        <button class="modal-close" onclick="closeModal('modal-login')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" required placeholder="Masukkan username">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="Masukkan password">
+          </div>
+          <div id="login-error-msg" class="error-msg hidden">
+            Username atau password salah!
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-login')">Batal</button>
+            <button type="submit" class="btn btn-primary">Masuk</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Form Kegiatan (Add / Edit) -->
+  <div id="modal-kegiatan-form" class="modal-overlay">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <h2 id="kegiatan-form-title">Tambah Kegiatan Pelatihan Baru</h2>
+        <button class="modal-close" onclick="closeModal('modal-kegiatan-form')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="kegiatan-form">
+          <input type="hidden" id="form-kegiatan-id">
+          
+          <div class="form-group">
+            <label for="form-kegiatan-no">Nomor Urut</label>
+            <input type="text" id="form-kegiatan-no" required placeholder="Contoh: 19">
+          </div>
+          
+          <div class="form-group">
+            <label for="form-kegiatan-nama">Nama Kegiatan Pelatihan</label>
+            <input type="text" id="form-kegiatan-nama" required placeholder="Contoh: Pendidikan dan Pelatihan Manajemen Aset">
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-kegiatan-form')">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Form Angkatan (Add / Edit) -->
+  <div id="modal-angkatan-form" class="modal-overlay">
+    <div class="modal-box modal-xl">
+      <div class="modal-header">
+        <h2 id="angkatan-form-title">Form Angkatan</h2>
+        <button class="modal-close" onclick="closeModal('modal-angkatan-form')">&times;</button>
+      </div>
+      <div class="modal-body scrollable-body">
+        <form id="angkatan-form">
+          <input type="hidden" id="form-angkatan-kegiatan-id">
+          <input type="hidden" id="form-angkatan-index">
+          
+          <div class="grid-form-col-2">
+            <div class="form-group">
+              <label for="form-akt-no">Angkatan Ke- (Akt)</label>
+              <input type="text" id="form-akt-no" required placeholder="Contoh: 1 atau 12">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-triwulan">Triwulan Pelaksanaan</label>
+              <select id="form-akt-triwulan" required>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+                <option value="I - II">I - II</option>
+                <option value="II - III">II - III</option>
+                <option value="III - IV">III - IV</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-tahun">Tahun Pelaksanaan</label>
+              <input type="number" id="form-akt-tahun" required placeholder="Contoh: 2025" min="2000" max="2100">
+            </div>
+          </div>
+          
+          <div class="grid-form-col-2">
+            <div class="form-group">
+              <label for="form-akt-from">Tanggal Mulai (From)</label>
+              <input type="text" id="form-akt-from" required placeholder="Contoh: 10 Nov 2025">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-to">Tanggal Selesai (To)</label>
+              <input type="text" id="form-akt-to" placeholder="Contoh: 18 Nov 2025 (Opsional)">
+            </div>
+          </div>
+          
+          <div class="grid-form-col-3">
+            <div class="form-group">
+              <label for="form-akt-hari">Jumlah Hari</label>
+              <input type="text" id="form-akt-hari" required placeholder="Contoh: 5 Hari">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-jp">Jumlah JP (Total)</label>
+              <input type="text" id="form-akt-jp" required placeholder="Contoh: 48">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-jp-bayar">JP Berbayar / Narasumber</label>
+              <input type="text" id="form-akt-jp-bayar" placeholder="Contoh: 3OJ 45JP">
+            </div>
+          </div>
+
+          <div class="grid-form-col-3">
+            <div class="form-group">
+              <label for="form-akt-peserta">Total Peserta</label>
+              <input type="number" id="form-akt-peserta" min="0" required placeholder="0">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-lulus">Peserta LULUS</label>
+              <input type="number" id="form-akt-lulus" min="0" required placeholder="0">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-tidak-lulus">Peserta Tidak Lulus</label>
+              <input type="text" id="form-akt-tidak-lulus" placeholder="Contoh: - atau 1 orang (Sakit)">
+            </div>
+          </div>
+
+          <div class="grid-form-col-2">
+            <div class="form-group">
+              <label for="form-akt-tempat">Tempat Pelaksanaan</label>
+              <input type="text" id="form-akt-tempat" required placeholder="Contoh: Stikes PKP atau Hotel Tavia">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-akt-pengajar">Daftar Pengajar (Tulis satu pengajar per baris)</label>
+              <textarea id="form-akt-pengajar" rows="3" placeholder="Contoh:&#10;Dr. Heryadi&#10;Susi Yuliawati"></textarea>
+            </div>
+          </div>
+
+          <hr class="form-divider">
+          <h3>Kelengkapan Dokumen Administrasi (Link / URL File PDF/XLSX)</h3>
+          <p class="form-subtitle">Biarkan kosong jika dokumen belum tersedia/belum ada.</p>
+
+          <div class="grid-form-docs">
+            <!-- Dynamic fields loaded by JS -->
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-angkatan-form')">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Angkatan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Kelola Jenis Dokumen -->
+  <div id="modal-manage-docs" class="modal-overlay">
+    <div class="modal-box modal-md">
+      <div class="modal-header">
+        <h2>Kelola Jenis Dokumen Administrasi</h2>
+        <button class="modal-close" onclick="closeModal('modal-manage-docs')">&times;</button>
+      </div>
+      <div class="modal-body scrollable-body" style="max-height: 60vh; overflow-y: auto;">
+        <p class="form-subtitle">Tambahkan, edit, atau hapus jenis dokumen wajib untuk setiap angkatan.</p>
+        <div id="doc-types-list-container" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+          <!-- Managed doc list loaded dynamically -->
+        </div>
+        <button type="button" id="btn-add-doc-type" class="btn btn-sm btn-outline-success" style="margin-top: 1rem; width: 100%;">
+          <i class="fa-solid fa-plus"></i> Tambah Jenis Dokumen Baru
+        </button>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-manage-docs')">Batal</button>
+        <button type="button" id="btn-save-doc-types" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Document Viewer -->
+  <div id="modal-document-viewer" class="modal-overlay">
+    <div class="modal-box" style="width: 90vw; height: 90vh; max-width: none; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h2 id="document-viewer-title">Pratinjau Dokumen</h2>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <button id="btn-download-doc" class="btn btn-sm btn-success" title="Unduh / Download Berkas">
+            <i class="fa-solid fa-download"></i> <span>Unduh</span>
+          </button>
+          <button id="btn-open-external" class="btn btn-sm btn-secondary" title="Buka di tab baru">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </button>
+          <button class="modal-close" onclick="closeModal('modal-document-viewer')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" style="flex: 1; padding: 0;">
+        <iframe id="document-viewer-iframe" style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Loading Spinner -->
+  <div id="modal-loading" class="modal-overlay">
+    <div style="color:white; font-size:1.25rem; display:flex; flex-direction:column; align-items:center; gap:1.5rem; font-family:var(--font-main);">
+      <i class="fa-solid fa-spinner fa-spin fa-3x" style="color:var(--color-accent);"></i>
+      <span id="loading-text">Menghubungkan ke Google Sheets...</span>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs (Compat version for Vanilla JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Database & Main scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
