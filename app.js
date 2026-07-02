@@ -304,7 +304,9 @@ function populateTahunDropdown() {
 
 // Calculations for Statistics Cards
 function renderStatistics() {
-  let totalKegiatan = state.kegiatanList.length;
+  const filteredList = getFilteredData();
+  
+  let totalKegiatan = filteredList.length;
   let totalAngkatan = 0;
   let totalPeserta = 0;
   let totalLulus = 0;
@@ -312,9 +314,25 @@ function renderStatistics() {
   let totalDocSlots = 0;
   let availableDocs = 0;
 
-  state.kegiatanList.forEach(keg => {
-    totalAngkatan += keg.angkatan.length;
-    keg.angkatan.forEach(ang => {
+  filteredList.forEach(keg => {
+    // Saring angkatan di dalam kegiatan sesuai filter Tahun dan Triwulan aktif
+    const activeAngkatans = keg.angkatan.filter(ang => {
+      // Filter Tahun
+      let matchesTahun = true;
+      if (state.filters.tahun !== 'all') {
+        matchesTahun = ang.tahun && ang.tahun.toString() === state.filters.tahun;
+      }
+      // Filter Triwulan
+      let matchesTriwulan = true;
+      if (state.filters.triwulan !== 'all') {
+        matchesTriwulan = ang.triwulan.includes(state.filters.triwulan);
+      }
+      return matchesTahun && matchesTriwulan;
+    });
+
+    totalAngkatan += activeAngkatans.length;
+    
+    activeAngkatans.forEach(ang => {
       // Total Peserta
       const pCount = parseInt(ang.total_peserta) || 0;
       totalPeserta += pCount;
