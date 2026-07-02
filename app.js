@@ -325,7 +325,7 @@ function renderStatistics() {
       // Filter Triwulan
       let matchesTriwulan = true;
       if (state.filters.triwulan !== 'all') {
-        matchesTriwulan = ang.triwulan.includes(state.filters.triwulan);
+        matchesTriwulan = (ang.triwulan || '').split(/[\s\-,]+/).includes(state.filters.triwulan);
       }
       return matchesTahun && matchesTriwulan;
     });
@@ -389,7 +389,7 @@ function renderTable() {
     // Get unique Triwulan list
     const triwulans = [...new Set(keg.angkatan.map(a => {
       const tw = a.triwulan || '';
-      return tw ? `TW ${tw}` : '';
+      return tw;
     }).filter(t => t))].join(', ');
 
     // Get unique Tahun list
@@ -460,7 +460,7 @@ function getFilteredData() {
     // 2. Filter Triwulan
     let matchesTriwulan = true;
     if (state.filters.triwulan !== 'all') {
-      matchesTriwulan = keg.angkatan.some(a => a.triwulan.includes(state.filters.triwulan));
+      matchesTriwulan = keg.angkatan.some(a => (a.triwulan || '').split(/[\s\-,]+/).includes(state.filters.triwulan));
     }
 
     // 3. Filter Tahun
