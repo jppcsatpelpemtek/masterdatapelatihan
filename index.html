@@ -113,6 +113,13 @@
       
       <div class="filter-options">
         <div class="filter-group">
+          <label for="filter-rumpun"><i class="fa-solid fa-sitemap"></i> Rumpun Kompetensi</label>
+          <select id="filter-rumpun">
+            <option value="all">Semua Rumpun</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
           <label for="filter-triwulan"><i class="fa-solid fa-calendar-quarter"></i> Triwulan</label>
           <select id="filter-triwulan">
             <option value="all">Semua Triwulan</option>
@@ -164,6 +171,7 @@
             <tr>
               <th width="60px">No.</th>
               <th>Nama Kegiatan Pelatihan</th>
+              <th width="180px">Rumpun Kompetensi</th>
               <th width="120px">Jml Angkatan</th>
               <th width="160px">Rentang Triwulan</th>
               <th width="100px">Tahun</th>
@@ -264,6 +272,11 @@
           <div class="form-group">
             <label for="form-kegiatan-nama">Nama Kegiatan Pelatihan</label>
             <input type="text" id="form-kegiatan-nama" required placeholder="Contoh: Pendidikan dan Pelatihan Manajemen Aset">
+          </div>
+          
+          <div class="form-group">
+            <label for="form-kegiatan-rumpun">Rumpun Kompetensi</label>
+            <input type="text" id="form-kegiatan-rumpun" placeholder="Contoh: Pemerintahan atau Teknis">
           </div>
           
           <div class="form-actions">

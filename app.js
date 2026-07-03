@@ -58,6 +58,7 @@ let state = {
   selectedAngkatanIndex: 0,
   filters: {
     search: '',
+    rumpun: 'all',
     triwulan: 'all',
     tahun: 'all',
     dokumen: 'all'
@@ -268,8 +269,39 @@ function checkAdminSession() {
 // --- Render Operations ---
 function renderApp() {
   renderStatistics();
+  populateRumpunDropdown();
   populateTahunDropdown();
   renderTable();
+}
+
+// Populate Rumpun Kompetensi dropdown secara dinamis dari data
+function populateRumpunDropdown() {
+  const select = document.getElementById('filter-rumpun');
+  if (!select) return;
+
+  const currentVal = select.value;
+  const rumpunSet = new Set();
+
+  state.kegiatanList.forEach(keg => {
+    if (keg.rumpun_kompetensi && keg.rumpun_kompetensi.trim() !== '') {
+      rumpunSet.add(keg.rumpun_kompetensi.trim());
+    }
+  });
+
+  const sortedRumpun = [...rumpunSet].sort();
+
+  select.innerHTML = '<option value="all">Semua Rumpun</option>';
+  sortedRumpun.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = r;
+    select.appendChild(opt);
+  });
+
+  // Restore previous selection if still valid
+  if ([...select.options].some(o => o.value === currentVal)) {
+    select.value = currentVal;
+  }
 }
 
 // Populate Tahun dropdown secara dinamis dari data
@@ -408,10 +440,17 @@ function renderTable() {
     });
     const avgLulus = totalPesertaKeg > 0 ? Math.round((totalLulusKeg / totalPesertaKeg) * 100) : 0;
 
+    // Rumpun Kompetensi badge color
+    const rumpunVal = keg.rumpun_kompetensi || '';
+    const rumpunBadge = rumpunVal
+      ? `<span class="rumpun-badge rumpun-${rumpunVal.toLowerCase().replace(/[^a-z0-9]/g, '')}">${escapeHtml(rumpunVal)}</span>`
+      : '<span class="text-muted">-</span>';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${keg.no || (idx + 1)}</td>
       <td><strong>${escapeHtml(keg.kegiatan)}</strong></td>
+      <td class="text-center">${rumpunBadge}</td>
       <td class="text-center"><span class="count-badge">${totalAngk} Angkatan</span></td>
       <td><i class="fa-solid fa-calendar-days text-muted"></i> ${triwulans || '-'}</td>
       <td>${years || '-'}</td>
@@ -453,23 +492,30 @@ function getFilteredData() {
       const matchPengajar = keg.angkatan.some(a => a.pengajar.some(p => p.toLowerCase().includes(query)));
       const matchTempat = keg.angkatan.some(a => a.tempat.toLowerCase().includes(query));
       const matchWaktu = keg.angkatan.some(a => a.waktu_pelaksanaan.toLowerCase().includes(query));
+      const matchRumpun = (keg.rumpun_kompetensi || '').toLowerCase().includes(query);
 
-      matchesSearch = matchKegiatan || matchPengajar || matchTempat || matchWaktu;
+      matchesSearch = matchKegiatan || matchPengajar || matchTempat || matchWaktu || matchRumpun;
     }
 
-    // 2. Filter Triwulan
+    // 2. Filter Rumpun Kompetensi
+    let matchesRumpun = true;
+    if (state.filters.rumpun !== 'all') {
+      matchesRumpun = (keg.rumpun_kompetensi || '').trim() === state.filters.rumpun;
+    }
+
+    // 3. Filter Triwulan
     let matchesTriwulan = true;
     if (state.filters.triwulan !== 'all') {
       matchesTriwulan = keg.angkatan.some(a => (a.triwulan || '').split(/[\s\-,]+/).includes(state.filters.triwulan));
     }
 
-    // 3. Filter Tahun
+    // 4. Filter Tahun
     let matchesTahun = true;
     if (state.filters.tahun !== 'all') {
       matchesTahun = keg.angkatan.some(a => a.tahun && a.tahun.toString() === state.filters.tahun);
     }
 
-    // 4. Filter Dokumen
+    // 5. Filter Dokumen
     let matchesDokumen = true;
     if (state.filters.dokumen !== 'all') {
       const isLengkap = keg.angkatan.every(ang => {
@@ -483,7 +529,7 @@ function getFilteredData() {
       }
     }
 
-    return matchesSearch && matchesTriwulan && matchesTahun && matchesDokumen;
+    return matchesSearch && matchesRumpun && matchesTriwulan && matchesTahun && matchesDokumen;
   });
 
   // Urutkan berdasarkan no urut (keg.no) dari terkecil ke terbesar
@@ -566,6 +612,11 @@ function renderSelectedAngkatanDetails() {
     ? ang.pengajar.map(t => `<span class="count-badge" style="background:#e2e8f0; color:#1e293b; margin:2px; display:inline-block;">${escapeHtml(t)}</span>`).join(' ')
     : '<em>Tidak ada data pengajar</em>';
 
+  // Rumpun Kompetensi untuk kegiatan ini
+  const rumpunLabel = keg.rumpun_kompetensi
+    ? `<span class="rumpun-badge rumpun-${keg.rumpun_kompetensi.toLowerCase().replace(/[^a-z0-9]/g, '')}">${escapeHtml(keg.rumpun_kompetensi)}</span>`
+    : '<em>Belum ditentukan</em>';
+
   let infoHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap: 1rem;">
       <h3 style="font-size:1.15rem; color:var(--color-primary-dark)">Informasi Angkatan ${ang.akt}</h3>
@@ -582,6 +633,10 @@ function renderSelectedAngkatanDetails() {
     </div>
     
     <div class="batch-info-grid">
+      <div class="info-item">
+        <label>Rumpun Kompetensi</label>
+        <span>${rumpunLabel}</span>
+      </div>
       <div class="info-item">
         <label>Waktu Pelaksanaan</label>
         <span>${escapeHtml(ang.waktu_pelaksanaan || '-')}</span>
@@ -749,6 +804,14 @@ function setupEventListeners() {
     renderApp();
   });
 
+  const filterRumpun = document.getElementById('filter-rumpun');
+  if (filterRumpun) {
+    filterRumpun.addEventListener('change', (e) => {
+      state.filters.rumpun = e.target.value;
+      renderApp();
+    });
+  }
+
   document.getElementById('filter-triwulan').addEventListener('change', (e) => {
     state.filters.triwulan = e.target.value;
     renderApp();
@@ -823,6 +886,7 @@ function setupEventListeners() {
     const id = document.getElementById('form-kegiatan-id').value;
     const no = document.getElementById('form-kegiatan-no').value;
     const nama = document.getElementById('form-kegiatan-nama').value;
+    const rumpun = document.getElementById('form-kegiatan-rumpun').value.trim();
 
     if (id) {
       // Edit
@@ -830,12 +894,14 @@ function setupEventListeners() {
       if (item) {
         item.no = no;
         item.kegiatan = nama;
+        item.rumpun_kompetensi = rumpun;
       }
     } else {
       // Add
       state.kegiatanList.push({
         no: no,
         kegiatan: nama,
+        rumpun_kompetensi: rumpun,
         jumlah_akt: "0",
         angkatan: []
       });
@@ -915,6 +981,7 @@ function setupEventListeners() {
     document.getElementById('form-kegiatan-id').value = '';
     document.getElementById('form-kegiatan-no').value = (state.kegiatanList.length + 1).toString();
     document.getElementById('form-kegiatan-nama').value = '';
+    document.getElementById('form-kegiatan-rumpun').value = '';
     openModal('modal-kegiatan-form');
   });
 
@@ -1097,6 +1164,7 @@ window.openEditKegiatan = function (kegiatanName) {
   document.getElementById('form-kegiatan-id').value = keg.kegiatan;
   document.getElementById('form-kegiatan-no').value = keg.no;
   document.getElementById('form-kegiatan-nama').value = keg.kegiatan;
+  document.getElementById('form-kegiatan-rumpun').value = keg.rumpun_kompetensi || '';
 
   openModal('modal-kegiatan-form');
 };

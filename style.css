@@ -466,6 +466,40 @@ h1, h2, h3, h4 {
   border-radius: var(--radius-full);
 }
 
+/* Rumpun Kompetensi Badge */
+.rumpun-badge {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.rumpun-pemerintahan {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+}
+
+.rumpun-teknis {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #fff;
+}
+
+.rumpun-manajerial {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  color: #fff;
+}
+
+.rumpun-sosialkultural {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #fff;
+}
+
 .table-responsive {
   width: 100%;
   overflow-x: auto;

@@ -85,41 +85,44 @@ function doGet(e) {
   
   for (var i = startIndex; i < rows.length; i++) {
     var row = rows[i];
-    if (!row || row.length < 3) continue;
+    if (!row || row.length < 4) continue;
     
     var noVal = row[0] ? row[0].toString().trim() : "";
     var kegiatanVal = row[1] ? row[1].toString().trim() : "";
-    var aktVal = row[2] ? row[2].toString().trim() : "";
+    var rumpunVal = row[2] ? row[2].toString().trim() : "";
+    var aktVal = row[3] ? row[3].toString().trim() : "";
     
     // Jika baris kosong, lewati
     if (noVal === "" && kegiatanVal === "" && aktVal === "") continue;
     
     // Menurunkan data Kegiatan jika kosong (untuk baris Angkatan berikutnya)
+    var currentRumpun = "";
     if (noVal === "" && kegiatanVal === "") {
       if (!currentKegiatan) continue;
     } else {
       currentNo = noVal;
       currentKegiatan = kegiatanVal;
+      currentRumpun = rumpunVal;
     }
     
-    var fromDate = row[3] ? row[3].toString().trim() : "";
-    var toDate = row[4] ? row[4].toString().trim() : "";
+    var fromDate = row[4] ? row[4].toString().trim() : "";
+    var toDate = row[5] ? row[5].toString().trim() : "";
     var waktu = fromDate;
     if (toDate !== "") {
       waktu = fromDate + " s.d. " + toDate;
     }
     
-    // Parse Pengajar (baris baru dipisah)
-    var pengajarVal = row[13] ? row[13].toString().trim() : "";
+    // Parse Pengajar (baris baru dipisah) - kolom 15
+    var pengajarVal = row[15] ? row[15].toString().trim() : "";
     var pengajar = [];
     if (pengajarVal !== "") {
       pengajar = pengajarVal.split('\n').map(function(t) { return t.trim(); }).filter(Boolean);
     }
     
-    // Parse Dokumen (index 15 s.d 37)
+    // Parse Dokumen (index 16 s.d 41) - geser +2 dari index 14
     var docs = {};
     for (var d = 0; d < docKeys.length; d++) {
-      var colIdx = 15 + d;
+      var colIdx = 16 + d;
       var val = row[colIdx] ? row[colIdx].toString().trim() : "";
       if (["none", "-", "", "null"].indexOf(val.toLowerCase()) !== -1) {
         docs[docKeys[d]] = null;
@@ -156,15 +159,16 @@ function doGet(e) {
       "waktu_pelaksanaan": waktu,
       "from_date": fromDate,
       "to_date": toDate,
-      "triwulan": row[5] ? row[5].toString().trim() : "",
-      "jumlah_hari": row[7] ? row[7].toString().trim() : "",
-      "jumlah_jp": row[8] ? row[8].toString().trim() : "",
-      "jp_berbayar": row[9] ? row[9].toString().trim() : "",
-      "total_peserta": row[10] ? row[10].toString().trim() : "",
-      "lulus": row[11] ? row[11].toString().trim() : "",
-      "tidak_lulus": row[12] ? row[12].toString().trim() : "",
+      "triwulan": row[6] ? row[6].toString().trim() : "",
+      "tahun": row[7] ? row[7].toString().trim() : "",
+      "jumlah_hari": row[9] ? row[9].toString().trim() : "",
+      "jumlah_jp": row[10] ? row[10].toString().trim() : "",
+      "jp_berbayar": row[11] ? row[11].toString().trim() : "",
+      "total_peserta": row[12] ? row[12].toString().trim() : "",
+      "lulus": row[13] ? row[13].toString().trim() : "",
+      "tidak_lulus": row[14] ? row[14].toString().trim() : "",
       "pengajar": pengajar,
-      "tempat": row[14] ? row[14].toString().trim() : "",
+      "tempat": row[8] ? row[8].toString().trim() : "",
       "documents": docs
     };
     
@@ -183,7 +187,8 @@ function doGet(e) {
       data.push({
         "no": currentNo,
         "kegiatan": currentKegiatan,
-        "jumlah_akt": row[6] ? row[6].toString().trim() : "1",
+        "rumpun_kompetensi": currentRumpun,
+        "jumlah_akt": "1",
         "angkatan": [batch]
       });
     }
@@ -228,9 +233,9 @@ function doPost(e) {
       "kurikulum", "kak", "undangan_rapat_persiapan", "notulen_rapat_persiapan",
       "permohonan_narsum", "surat_permohonan_peserta", "panggilan_peserta",
       "sk_penunjukan", "st_penyelenggara", "st_wi", "undangan_rapat_evaluasi",
-      "notulen_rapat_evaluasi", "sk_penetapan", "surat_pengembalian_peserta",
-      "rekap_nilai", "absensi", "biodata_pengajar", "ktp_npwp", "materi",
-      "jadwal", "laporan_akhir", "dokumentasi", "hasil_evaluasi"
+      "notulen_rapat_evaluasi", "berita_acara_evaluasi", "sk_penetapan", "surat_pengembalian_peserta",
+      "rekap_nilai", "absensi", "biodata_pengajar", "daftar_hadir_narsum", "daftar_hadir_penyelenggara",
+      "ktp_npwp", "materi", "jadwal", "laporan_akhir", "dokumentasi", "hasil_evaluasi"
     ];
     
     postData.forEach(function(keg) {
@@ -238,11 +243,13 @@ function doPost(e) {
         var row = [];
         row.push(idx === 0 ? keg.no : "");
         row.push(idx === 0 ? keg.kegiatan : "");
+        row.push(idx === 0 ? (keg.rumpun_kompetensi || "") : "");
         row.push(ang.akt || "");
         row.push(ang.from_date || "");
         row.push(ang.to_date || "");
         row.push(ang.triwulan || "");
-        row.push(idx === 0 ? keg.jumlah_akt || keg.angkatan.length.toString() : "");
+        row.push(ang.tahun || "");
+        row.push(ang.tempat || "");
         row.push(ang.jumlah_hari || "");
         row.push(ang.jumlah_jp || "");
         row.push(ang.jp_berbayar || "");
@@ -253,9 +260,7 @@ function doPost(e) {
         var teachers = Array.isArray(ang.pengajar) ? ang.pengajar.join('\n') : (ang.pengajar || "");
         row.push(teachers);
         
-        row.push(ang.tempat || "");
-        
-        // Menulis dokumen (index 15 s.d 37)
+        // Menulis dokumen (index 16 s.d 41)
         docKeys.forEach(function(key) {
           var val = ang.documents ? ang.documents[key] : null;
           if (!val) {
