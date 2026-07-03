@@ -392,6 +392,7 @@ function renderStatistics() {
   document.getElementById('stat-total-kegiatan').innerText = totalKegiatan;
   document.getElementById('stat-total-angkatan').innerText = totalAngkatan;
   document.getElementById('stat-total-peserta').innerText = totalPeserta.toLocaleString('id-ID');
+  document.getElementById('stat-total-lulus').innerText = totalLulus.toLocaleString('id-ID');
   document.getElementById('stat-kelulusan-rate').innerText = `${graduationRate}%`;
   document.getElementById('stat-dokumen-rate').innerText = `${docCompletenessRate}%`;
 }
@@ -415,22 +416,36 @@ function renderTable() {
   document.getElementById('main-data-table').classList.remove('hidden');
 
   filteredList.forEach((keg, idx) => {
-    // Calculate stats per kegiatan
-    const totalAngk = keg.angkatan.length;
+    // Calculate stats per kegiatan based on active filters
+    const activeAngkatans = keg.angkatan.filter(ang => {
+      // Filter Tahun
+      let matchesTahun = true;
+      if (state.filters.tahun !== 'all') {
+        matchesTahun = ang.tahun && ang.tahun.toString() === state.filters.tahun;
+      }
+      // Filter Triwulan
+      let matchesTriwulan = true;
+      if (state.filters.triwulan !== 'all') {
+        matchesTriwulan = (ang.triwulan || '').split(/[\s\-,]+/).includes(state.filters.triwulan);
+      }
+      return matchesTahun && matchesTriwulan;
+    });
+
+    const totalAngk = activeAngkatans.length;
 
     // Get unique Triwulan list
-    const triwulans = [...new Set(keg.angkatan.map(a => {
+    const triwulans = [...new Set(activeAngkatans.map(a => {
       const tw = a.triwulan || '';
       return tw;
     }).filter(t => t))].join(', ');
 
     // Get unique Tahun list
-    const years = [...new Set(keg.angkatan.map(a => a.tahun).filter(y => y))].join(', ');
+    const years = [...new Set(activeAngkatans.map(a => a.tahun).filter(y => y))].join(', ');
 
     // Calculate average kelulusan rate — sinkronkan dengan data peserta lulus yang valid
     let totalPesertaKeg = 0;
     let totalLulusKeg = 0;
-    keg.angkatan.forEach(a => {
+    activeAngkatans.forEach(a => {
       totalPesertaKeg += parseInt(a.total_peserta) || 0;
       const lulusVal = a.lulus;
       const lulusNum = (lulusVal !== null && lulusVal !== undefined && lulusVal !== '' && lulusVal !== '-') ? parseInt(lulusVal) : NaN;
