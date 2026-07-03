@@ -667,7 +667,7 @@ function renderSelectedAngkatanDetails() {
       </div>
       <div class="info-item">
         <label>Durasi & JP</label>
-        <span>${escapeHtml(ang.jumlah_hari || '-')} / ${escapeHtml(ang.jumlah_jp || '-')} JP (${escapeHtml(ang.jp_berbayar || '-')})</span>
+        <span>${escapeHtml(ang.jumlah_hari || '-')} / ${escapeHtml(ang.jumlah_jp || '-')} JP <span style="color:var(--text-muted); font-size:0.85em;">(JP Berbayar: ${escapeHtml(ang.jp_berbayar || '-')})</span></span>
       </div>
       <div class="info-item">
         <label>Statistik Peserta</label>
