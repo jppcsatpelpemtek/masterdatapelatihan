@@ -562,7 +562,24 @@ window.openDetail = function (kegiatanName) {
   if (!keg) return;
 
   state.selectedKegiatanId = keg.kegiatan;
-  state.selectedAngkatanIndex = 0;
+
+  // Find the first angkatan matching the active Tahun & Triwulan filters
+  let firstMatchIdx = 0;
+  if (state.filters.tahun !== 'all' || state.filters.triwulan !== 'all') {
+    const matchIdx = keg.angkatan.findIndex(ang => {
+      let matchT = true;
+      if (state.filters.tahun !== 'all') {
+        matchT = ang.tahun && ang.tahun.toString() === state.filters.tahun;
+      }
+      let matchTw = true;
+      if (state.filters.triwulan !== 'all') {
+        matchTw = (ang.triwulan || '').split(/[\s\-,]+/).includes(state.filters.triwulan);
+      }
+      return matchT && matchTw;
+    });
+    if (matchIdx !== -1) firstMatchIdx = matchIdx;
+  }
+  state.selectedAngkatanIndex = firstMatchIdx;
 
   document.getElementById('detail-no').innerText = keg.no || "#";
   document.getElementById('detail-title').innerText = keg.kegiatan;
