@@ -62,12 +62,14 @@ function doGet(e) {
   // Mencari letak baris header data
   var startIndex = 0;
   for (var i = 0; i < rows.length; i++) {
-    if (rows[i][0] === "No." || rows[i][1] === "Kegiatan" || rows[i][1] === "Kegiatan Pelatihan") {
-      startIndex = i + 3; // Melewati header, baris kosong, dan From/To sub-header
+    var col0 = rows[i][0] ? rows[i][0].toString().trim() : "";
+    var col1 = rows[i][1] ? rows[i][1].toString().trim() : "";
+    if (col0 === "No" || col0 === "No." || col1 === "Kegiatan" || col1 === "Kegiatan Pelatihan") {
+      startIndex = i + 1; // Mulai dari baris setelah header
       break;
     }
   }
-  if (startIndex === 0) startIndex = 3; // Fallback jika tidak terdeteksi
+  if (startIndex === 0) startIndex = 1; // Fallback jika tidak terdeteksi
   
   var data = [];
   var currentKegiatan = null;
@@ -77,9 +79,9 @@ function doGet(e) {
     "kurikulum", "kak", "undangan_rapat_persiapan", "notulen_rapat_persiapan",
     "permohonan_narsum", "surat_permohonan_peserta", "panggilan_peserta",
     "sk_penunjukan", "st_penyelenggara", "st_wi", "undangan_rapat_evaluasi",
-    "notulen_rapat_evaluasi", "sk_penetapan", "surat_pengembalian_peserta",
-    "rekap_nilai", "absensi", "biodata_pengajar", "ktp_npwp", "materi",
-    "jadwal", "laporan_akhir", "dokumentasi", "hasil_evaluasi"
+    "notulen_rapat_evaluasi", "berita_acara_evaluasi", "sk_penetapan", "surat_pengembalian_peserta",
+    "rekap_nilai", "absensi", "biodata_pengajar", "daftar_hadir_narsum", "daftar_hadir_penyelenggara",
+    "ktp_npwp", "materi", "jadwal", "laporan_akhir", "dokumentasi", "hasil_evaluasi"
   ];
 
   
@@ -214,12 +216,14 @@ function doPost(e) {
     // Mencari baris awal data
     var startIndex = 0;
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i][0] === "No." || rows[i][1] === "Kegiatan") {
-        startIndex = i + 3;
+      var col0 = rows[i][0] ? rows[i][0].toString().trim() : "";
+      var col1 = rows[i][1] ? rows[i][1].toString().trim() : "";
+      if (col0 === "No" || col0 === "No." || col1 === "Kegiatan") {
+        startIndex = i + 1; // Mulai dari baris setelah header
         break;
       }
     }
-    if (startIndex === 0) startIndex = 3;
+    if (startIndex === 0) startIndex = 1;
     
     // Hapus baris data lama (sisakan header & subheader)
     var lastRow = sheet.getLastRow();
@@ -287,5 +291,90 @@ function doPost(e) {
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Pemicu Otomatis (Trigger): Dipanggil setiap ada perubahan di spreadsheet.
+ * Mengirimkan data terbaru langsung ke Firebase Firestore secara realtime.
+ * 
+ * CARA MENGAKTIFKAN:
+ * 1. Di Google Apps Script editor, klik ikon jam weker (Triggers) di menu kiri.
+ * 2. Klik '+ Add Trigger' di kanan bawah.
+ * 3. Konfigurasi:
+ *    - Choose which function to run: 'onEditTrigger'
+ *    - Choose which deployment should run: 'Head'
+ *    - Select event source: 'From spreadsheet'
+ *    - Select event type: 'On edit' (atau 'On change')
+ * 4. Klik Save dan setujui izin akses akun Google Anda.
+ */
+function onEditTrigger(e) {
+  try {
+    // Ambil data terbaru
+    var data = doGet(null);
+    var dataJson = JSON.parse(data.getContent());
+    
+    // Kirim langsung ke Firebase Firestore REST API
+    var projectId = "pemerintahanteknis";
+    var firestoreUrl = "https://firestore.googleapis.com/v1/projects/" + projectId + "/databases/(default)/documents/master_data/pelatihan_db";
+    
+    var docLabels = {
+      "kurikulum": "Kurikulum", "kak": "KAK", "undangan_rapat_persiapan": "Undangan Rapat Persiapan",
+      "notulen_rapat_persiapan": "Notulen Rapat Persiapan", "permohonan_narsum": "Permohonan Narsum",
+      "surat_permohonan_peserta": "Surat Permohonan Peserta", "panggilan_peserta": "Panggilan Peserta",
+      "sk_penunjukan": "SK Penunjukan", "st_penyelenggara": "ST Penyelenggara", "st_wi": "ST WI",
+      "undangan_rapat_evaluasi": "Undangan Rapat Evaluasi", "notulen_rapat_evaluasi": "Notulen Rapat Evaluasi",
+      "berita_acara_evaluasi": "Berita Acara Evaluasi", "sk_penetapan": "SK Penetapan",
+      "surat_pengembalian_peserta": "Surat Pengembalian Peserta", "rekap_nilai": "Rekap Nilai Peserta",
+      "absensi": "Absensi Peserta", "biodata_pengajar": "Biodata Pengajar", "daftar_hadir_narsum": "Daftar Hadir Narasumber",
+      "daftar_hadir_penyelenggara": "Daftar Hadir Penyelenggara", "ktp_npwp": "KTP, NPWP Pengajar",
+      "materi": "Materi Pengajar", "jadwal": "Jadwal Harian", "laporan_akhir": "Laporan Akhir",
+      "dokumentasi": "Dokumentasi", "hasil_evaluasi": "Hasil Evaluasi"
+    };
+
+    // Konversi nilai JavaScript ke Firestore Format Value
+    function toFirestoreValue(val) {
+      if (val === null || val === undefined) {
+        return { nullValue: null };
+      } else if (typeof val === 'boolean') {
+        return { booleanValue: val };
+      } else if (typeof val === 'number') {
+        return { doubleValue: val };
+      } else if (typeof val === 'string') {
+        return { stringValue: val };
+      } else if (Array.isArray(val)) {
+        var list = [];
+        for (var i = 0; i < val.length; i++) {
+          list.push(toFirestoreValue(val[i]));
+        }
+        return { arrayValue: { values: list } };
+      } else if (typeof val === 'object') {
+        var fields = {};
+        for (var key in val) {
+          fields[key] = toFirestoreValue(val[key]);
+        }
+        return { mapValue: { fields: fields } };
+      }
+      return { nullValue: null };
+    }
+
+    var payload = {
+      fields: {
+        kegiatanList: toFirestoreValue(dataJson),
+        documentLabels: toFirestoreValue(docLabels)
+      }
+    };
+
+    var options = {
+      method: "patch",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+
+    UrlFetchApp.fetch(firestoreUrl, options);
+    Logger.log("Realtime sync ke Firebase berhasil.");
+  } catch (err) {
+    Logger.log("Gagal sync realtime: " + err.toString());
   }
 }

@@ -262,13 +262,13 @@ h1, h2, h3, h4 {
 /* --- Dashboard Statistics Cards --- */
 .dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 0.75rem;
 }
 
 @media (max-width: 1200px) {
   .dashboard-stats {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 0.5rem;
   }
 }
@@ -334,6 +334,9 @@ h1, h2, h3, h4 {
 
 .card-green::after { background-color: #10b981; }
 .card-green .stat-icon { background-color: #ecfdf5; color: #10b981; }
+
+.card-emerald::after { background-color: #059669; }
+.card-emerald .stat-icon { background-color: #d1fae5; color: #059669; }
 
 .card-teal::after { background-color: #14b8a6; }
 .card-teal .stat-icon { background-color: #f0fdfa; color: #14b8a6; }

@@ -392,7 +392,8 @@ function renderStatistics() {
   document.getElementById('stat-total-kegiatan').innerText = totalKegiatan;
   document.getElementById('stat-total-angkatan').innerText = totalAngkatan;
   document.getElementById('stat-total-peserta').innerText = totalPeserta.toLocaleString('id-ID');
-  document.getElementById('stat-total-lulus').innerText = totalLulus.toLocaleString('id-ID');
+  const elTotalLulus = document.getElementById('stat-total-lulus');
+  if (elTotalLulus) elTotalLulus.innerText = totalLulus.toLocaleString('id-ID');
   document.getElementById('stat-kelulusan-rate').innerText = `${graduationRate}%`;
   document.getElementById('stat-dokumen-rate').innerText = `${docCompletenessRate}%`;
 }
