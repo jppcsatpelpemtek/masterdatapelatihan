@@ -579,8 +579,9 @@ h1, h2, h3, h4 {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   max-height: 90vh;
-  display: flex;
-  flex-direction: column;
+  max-height: 90dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
   transform: translateY(20px);
   transition: transform var(--transition-normal);
   width: 90%;
@@ -594,8 +595,16 @@ h1, h2, h3, h4 {
 /* Modal Sizes */
 .modal-sm { max-width: 420px; }
 .modal-md { max-width: 600px; }
-.modal-lg { max-width: 900px; }
-.modal-xl { max-width: 1200px; }
+.modal-lg { 
+  max-width: 900px; 
+  height: 90vh;
+  height: 90dvh;
+}
+.modal-xl { 
+  max-width: 1200px; 
+  height: 90vh;
+  height: 90dvh;
+}
 
 .modal-header {
   padding: 1.25rem 1.5rem;
@@ -647,11 +656,18 @@ h1, h2, h3, h4 {
 .modal-body {
   padding: 1.5rem;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   flex: 1;
+  min-height: 0;
+  max-height: calc(90vh - 80px);
+  max-height: calc(90dvh - 80px);
 }
 
 .scrollable-body {
   max-height: 70vh;
+  max-height: 70dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* --- Tabs inside Detail Modal --- */

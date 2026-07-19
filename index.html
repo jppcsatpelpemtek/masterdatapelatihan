@@ -15,6 +15,87 @@
   
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* Force Safari modal scroll fix via inline style (bypassing stylesheet cache) */
+    .modal-box {
+      display: grid !important;
+      grid-template-rows: auto 1fr !important;
+      max-height: 90vh !important;
+      max-height: 90dvh !important;
+      height: auto;
+    }
+    
+    .modal-lg, .modal-xl {
+      height: 90vh !important;
+      height: 90dvh !important;
+    }
+    
+    .modal-body {
+      max-height: calc(90vh - 80px) !important;
+      max-height: calc(90dvh - 80px) !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      min-height: 0 !important;
+    }
+    
+    /* Custom Scrollbar Styles for WebKit (Safari, Chrome) to make it always visible & clickable */
+    .modal-body::-webkit-scrollbar,
+    .scrollable-body::-webkit-scrollbar {
+      width: 10px !important;
+      height: 10px !important;
+      display: block !important;
+    }
+    
+    .modal-body::-webkit-scrollbar-track,
+    .scrollable-body::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border-radius: 6px !important;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb,
+    .scrollable-body::-webkit-scrollbar-thumb {
+      background: #cbd5e1 !important;
+      border-radius: 6px !important;
+      border: 2px solid #f1f5f9 !important;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb:hover,
+    .scrollable-body::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8 !important;
+    }
+
+    /* Custom Horizontal Scrollbar for Table Wrapper to ensure it's visible & swipeable on mobile */
+    .table-responsive {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      padding-bottom: 12px !important; /* Space so scrollbar doesn't cover data */
+    }
+
+    .data-table {
+      min-width: 980px !important; /* Forces horizontal overflow on mobile screens so scrollbar appears */
+    }
+
+    .table-responsive::-webkit-scrollbar {
+      height: 10px !important;
+      display: block !important;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+      background: #f1f5f9 !important;
+      border-radius: 6px !important;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+      background: #2563eb !important; /* Accent blue for high visibility */
+      border-radius: 6px !important;
+      border: 2px solid #f1f5f9 !important;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+      background: #1d4ed8 !important;
+    }
+  </style>
 </head>
 <body>
 
