@@ -465,7 +465,7 @@ function renderTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${keg.no || (idx + 1)}</td>
-      <td><strong>${escapeHtml(keg.kegiatan)}</strong></td>
+      <td><a href="#" class="kegiatan-link" onclick="event.preventDefault(); openDetail('${escapeQuote(keg.kegiatan)}')">${escapeHtml(keg.kegiatan)}</a></td>
       <td class="text-center">${rumpunBadge}</td>
       <td class="text-center"><span class="count-badge">${totalAngk} Angkatan</span></td>
       <td><i class="fa-solid fa-calendar-days text-muted"></i> ${triwulans || '-'}</td>
@@ -1369,14 +1369,44 @@ function openDocumentViewer(url, title) {
   const titleEl = document.getElementById('document-viewer-title');
   const btnExternal = document.getElementById('btn-open-external');
   const btnDownload = document.getElementById('btn-download-doc');
+  const folderPlaceholder = document.getElementById('folder-link-placeholder');
+  const btnOpenFolderDirect = document.getElementById('btn-open-folder-direct');
   
-  // Convert standard Drive URLs to preview URLs to allow embedding
-  let embedUrl = url;
-  if (url.includes('drive.google.com/file/d/')) {
-    embedUrl = url.replace(/\/view.*$/, '/preview');
+  // Check if URL is a Google Drive folder link (not embeddable in iframe)
+  const isFolderLink = url.includes('drive.google.com/drive/folders/');
+  
+  if (isFolderLink) {
+    // Show folder placeholder, hide iframe
+    iframe.style.display = 'none';
+    iframe.src = 'about:blank';
+    if (folderPlaceholder) {
+      folderPlaceholder.classList.remove('hidden');
+    }
+    if (btnOpenFolderDirect) {
+      btnOpenFolderDirect.onclick = () => window.open(url, '_blank');
+    }
+    // Hide download button for folders
+    if (btnDownload) {
+      btnDownload.style.display = 'none';
+    }
+  } else {
+    // Normal file: show iframe, hide folder placeholder
+    iframe.style.display = 'block';
+    if (folderPlaceholder) {
+      folderPlaceholder.classList.add('hidden');
+    }
+    if (btnDownload) {
+      btnDownload.style.display = '';
+    }
+    
+    // Convert standard Drive URLs to preview URLs to allow embedding
+    let embedUrl = url;
+    if (url.includes('drive.google.com/file/d/')) {
+      embedUrl = url.replace(/\/view.*$/, '/preview');
+    }
+    iframe.src = embedUrl;
   }
 
-  iframe.src = embedUrl;
   titleEl.innerText = title || "Pratinjau Dokumen";
   btnExternal.onclick = () => window.open(url, '_blank');
   

@@ -95,6 +95,114 @@
     .table-responsive::-webkit-scrollbar-thumb:hover {
       background: #1d4ed8 !important;
     }
+
+    /* Clickable Training Name link */
+    .kegiatan-link {
+      color: var(--color-primary-dark) !important;
+      text-decoration: none !important;
+      font-weight: 600 !important;
+      transition: color var(--transition-fast) !important;
+    }
+    
+    .kegiatan-link:hover {
+      color: var(--color-accent) !important;
+      text-decoration: underline !important;
+    }
+
+    /* Folder Link Placeholder Styles */
+    .folder-placeholder {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 50%, #dbeafe 100%) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      z-index: 10 !important;
+    }
+    
+    .folder-placeholder.hidden {
+      display: none !important;
+    }
+    
+    .folder-placeholder-content {
+      text-align: center !important;
+      max-width: 420px !important;
+      padding: 2rem !important;
+    }
+    
+    .folder-icon-wrapper {
+      width: 100px !important;
+      height: 100px !important;
+      border-radius: 50% !important;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 auto 1.5rem auto !important;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3) !important;
+    }
+    
+    .folder-icon-wrapper i {
+      font-size: 2.5rem !important;
+      color: #ffffff !important;
+    }
+    
+    .folder-placeholder-content h3 {
+      font-size: 1.25rem !important;
+      font-weight: 700 !important;
+      color: #1e293b !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .folder-placeholder-content p {
+      font-size: 0.875rem !important;
+      color: #64748b !important;
+      margin-bottom: 1.5rem !important;
+      line-height: 1.5 !important;
+    }
+    
+    .folder-instruction-box {
+      background: #ffffff !important;
+      border: 2px dashed #2563eb !important;
+      border-radius: 12px !important;
+      padding: 1rem 1.25rem !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.75rem !important;
+      margin-bottom: 1.5rem !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    }
+    
+    .folder-instruction-box i {
+      font-size: 1.5rem !important;
+      color: #2563eb !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .folder-instruction-box span {
+      font-size: 0.9rem !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
+      text-align: left !important;
+      line-height: 1.4 !important;
+    }
+    
+    .btn-open-folder {
+      padding: 0.75rem 1.5rem !important;
+      font-size: 0.9375rem !important;
+      font-weight: 600 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+      transition: all 0.2s ease !important;
+    }
+    
+    .btn-open-folder:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35) !important;
+    }
   </style>
 </head>
 <body>
@@ -527,8 +635,25 @@
           <button class="modal-close" onclick="closeModal('modal-document-viewer')">&times;</button>
         </div>
       </div>
-      <div class="modal-body" style="flex: 1; padding: 0;">
+      <div class="modal-body" style="flex: 1; padding: 0; position: relative;">
         <iframe id="document-viewer-iframe" style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+        <!-- Folder Link Placeholder (shown when URL is a Drive folder, not embeddable) -->
+        <div id="folder-link-placeholder" class="folder-placeholder hidden">
+          <div class="folder-placeholder-content">
+            <div class="folder-icon-wrapper">
+              <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3>Dokumen Tersimpan di Google Drive</h3>
+            <p>File ini berupa tautan folder Google Drive yang tidak dapat ditampilkan langsung di dalam pratinjau.</p>
+            <div class="folder-instruction-box">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Klik link tautan di pojok kanan atas <br>untuk pergi ke halaman berikut</span>
+            </div>
+            <button class="btn btn-primary btn-open-folder" id="btn-open-folder-direct">
+              <i class="fa-solid fa-external-link-alt"></i> Buka Folder di Google Drive
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
