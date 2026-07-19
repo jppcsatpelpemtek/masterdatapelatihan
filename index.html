@@ -110,6 +110,10 @@
       text-decoration: underline !important;
     }
 
+    /* Slate card color for Lain-lain stat card */
+    .card-slate::after { background-color: #475569 !important; }
+    .card-slate .stat-icon { background-color: #f1f5f9 !important; color: #475569 !important; }
+
     /* Folder Link Placeholder Styles */
     .folder-placeholder {
       position: absolute !important;
@@ -298,6 +302,14 @@
         <div class="stat-details">
           <h3>Sinkron data</h3>
           <p>Spreadsheet &amp; Jadwal <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem; margin-left: 2px;"></i></p>
+        </div>
+      </a>
+
+      <a href="https://docs.google.com/spreadsheets/d/12J5n06ktyhyXfNHgB6WZBSx4eMygIxFXBSKm0w3s7W8/edit?gid=0#gid=0" target="_blank" class="stat-card card-slate link-card" style="text-decoration: none; color: inherit;">
+        <div class="stat-icon"><i class="fa-solid fa-link"></i></div>
+        <div class="stat-details">
+          <h3>Lain-lain</h3>
+          <p>Link dan dokumen tambahan <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem; margin-left: 2px;"></i></p>
         </div>
       </a>
     </section>
@@ -625,16 +637,16 @@
   <div id="modal-document-viewer" class="modal-overlay">
     <div class="modal-box" style="width: 90vw; height: 90vh; max-width: none; display: flex; flex-direction: column;">
       <div class="modal-header">
-        <h2 id="document-viewer-title">Pratinjau Dokumen</h2>
-        <div style="display:flex; gap:0.5rem; align-items:center;">
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-shrink: 0;">
           <button id="btn-download-doc" class="btn btn-sm btn-success" title="Unduh / Download Berkas">
             <i class="fa-solid fa-download"></i> <span>Unduh</span>
           </button>
           <button id="btn-open-external" class="btn btn-sm btn-secondary" title="Buka di tab baru">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
           </button>
-          <button class="modal-close" onclick="closeModal('modal-document-viewer')">&times;</button>
         </div>
+        <h2 id="document-viewer-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; margin-left: 1rem; margin-right: 1rem;">Pratinjau Dokumen</h2>
+        <button class="modal-close" onclick="closeModal('modal-document-viewer')" style="flex-shrink: 0;">&times;</button>
       </div>
       <div class="modal-body" style="flex: 1; padding: 0; position: relative;">
         <iframe id="document-viewer-iframe" style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>

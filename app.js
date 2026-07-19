@@ -766,7 +766,7 @@ function renderSelectedAngkatanDetails() {
         fileLinkHtml = `
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:0.5rem;">
             <span class="doc-filename" style="max-width:180px;" title="${escapeHtml(fName)}">${escapeHtml(fName)}</span>
-            <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(fName)}" data-url="${escapeHtml(fUrl)}" title="Buka Tautan Langsung">
+            <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(label)}" data-url="${escapeHtml(fUrl)}" title="Buka Tautan Langsung">
               <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.875rem;"></i>
             </button>
           </div>
@@ -775,7 +775,7 @@ function renderSelectedAngkatanDetails() {
         fileLinkHtml = file.map(f => `
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:0.5rem; margin-top:4px;">
             <span class="doc-filename" style="max-width:180px;" title="${escapeHtml(f)}">${escapeHtml(f)}</span>
-            <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(f)}" data-url="" title="Cari & Unduh dari Drive">
+            <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(label)}" data-url="" title="Cari & Unduh dari Drive">
               <i class="fa-solid fa-cloud-arrow-down" style="font-size:0.875rem;"></i>
             </button>
           </div>
@@ -790,7 +790,7 @@ function renderSelectedAngkatanDetails() {
           fileLinkHtml = `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:0.5rem;">
               <span class="doc-filename" style="max-width:180px;" title="${escapeHtml(file)}">Tautan Dokumen</span>
-              <button class="doc-download-btn doc-action-btn" data-filename="Dokumen" data-url="${escapeHtml(file)}" title="Buka Tautan Langsung">
+              <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(label)}" data-url="${escapeHtml(file)}" title="Buka Tautan Langsung">
                 <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.875rem;"></i>
               </button>
             </div>
@@ -799,7 +799,7 @@ function renderSelectedAngkatanDetails() {
           fileLinkHtml = `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:0.5rem;">
               <span class="doc-filename" style="max-width:180px;" title="${escapeHtml(file)}">${escapeHtml(file)}</span>
-              <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(file)}" data-url="" title="Cari & Unduh dari Drive">
+              <button class="doc-download-btn doc-action-btn" data-filename="${escapeHtml(label)}" data-url="" title="Cari & Unduh dari Drive">
                 <i class="fa-solid fa-cloud-arrow-down" style="font-size:0.875rem;"></i>
               </button>
             </div>
