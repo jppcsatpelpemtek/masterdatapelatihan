@@ -342,6 +342,7 @@ function renderStatistics() {
   let totalAngkatan = 0;
   let totalPeserta = 0;
   let totalLulus = 0;
+  let totalTidakLulus = 0;
 
   let totalDocSlots = 0;
   let availableDocs = 0;
@@ -376,6 +377,15 @@ function renderStatistics() {
         totalLulus += lulusNum;
       }
 
+      // Total Tidak Lulus — parsing angka dari field tidak_lulus
+      const tidakLulusRaw = ang.tidak_lulus;
+      if (tidakLulusRaw !== null && tidakLulusRaw !== undefined && tidakLulusRaw !== '' && tidakLulusRaw !== '-') {
+        const tlNum = parseInt(String(tidakLulusRaw).replace(/[^0-9]/g, ''));
+        if (!isNaN(tlNum)) {
+          totalTidakLulus += tlNum;
+        }
+      }
+
       // Documents completeness check
       Object.keys(DOCUMENT_LABELS).forEach(docKey => {
         totalDocSlots++;
@@ -394,6 +404,8 @@ function renderStatistics() {
   document.getElementById('stat-total-peserta').innerText = totalPeserta.toLocaleString('id-ID');
   const elTotalLulus = document.getElementById('stat-total-lulus');
   if (elTotalLulus) elTotalLulus.innerText = totalLulus.toLocaleString('id-ID');
+  const elTotalTidakLulus = document.getElementById('stat-total-tidak-lulus');
+  if (elTotalTidakLulus) elTotalTidakLulus.innerText = totalTidakLulus.toLocaleString('id-ID');
   document.getElementById('stat-kelulusan-rate').innerText = `${graduationRate}%`;
   document.getElementById('stat-dokumen-rate').innerText = `${docCompletenessRate}%`;
 }

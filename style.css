@@ -345,6 +345,9 @@ h1, h2, h3, h4 {
 .card-emerald::after { background-color: #059669; }
 .card-emerald .stat-icon { background-color: #d1fae5; color: #059669; }
 
+.card-rose::after { background-color: #e11d48; }
+.card-rose .stat-icon { background-color: #fff1f2; color: #e11d48; }
+
 .card-teal::after { background-color: #14b8a6; }
 .card-teal .stat-icon { background-color: #f0fdfa; color: #14b8a6; }
 
