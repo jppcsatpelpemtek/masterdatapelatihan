@@ -64,7 +64,7 @@ h1, h2, h3, h4 {
 
 /* --- App Layout Header --- */
 .app-header {
-  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
   color: var(--text-light);
   padding: 1.5rem 2rem;
   box-shadow: var(--shadow-md);
@@ -114,7 +114,7 @@ h1, h2, h3, h4 {
 
 .brand-text p {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: #e0f2fe;
   font-weight: 500;
 }
 
@@ -351,8 +351,11 @@ h1, h2, h3, h4 {
 .card-teal::after { background-color: #14b8a6; }
 .card-teal .stat-icon { background-color: #f0fdfa; color: #14b8a6; }
 
-.card-orange::after { background-color: #f59e0b; }
-.card-orange .stat-icon { background-color: #fffbeb; color: #f59e0b; }
+.card-amber::after { background-color: #f59e0b; }
+.card-amber .stat-icon { background-color: #fffbeb; color: #f59e0b; }
+
+.card-orange::after { background-color: #ea580c; }
+.card-orange .stat-icon { background-color: #fff7ed; color: #ea580c; }
 
 .card-red::after { background-color: #ef4444; }
 .card-red .stat-icon { background-color: #fef2f2; color: #ef4444; }

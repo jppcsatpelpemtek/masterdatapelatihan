@@ -284,7 +284,10 @@
       <div class="stat-card card-rose">
         <div class="stat-icon"><i class="fa-solid fa-user-xmark"></i></div>
         <div class="stat-details">
-          <h3 id="stat-total-tidak-lulus">0</h3>
+          <div style="display: flex; align-items: baseline; gap: 0.35rem;">
+            <h3 id="stat-total-tidak-lulus">0</h3>
+            <span id="stat-tidak-lulus-percent-inline" style="font-size: 0.75rem; font-weight: 600; color: #e11d48; background: #ffe4e6; padding: 0.05rem 0.35rem; border-radius: 4px;">(0%)</span>
+          </div>
           <p>Total Peserta Tidak Lulus</p>
         </div>
       </div>
@@ -294,6 +297,14 @@
         <div class="stat-details">
           <h3 id="stat-kelulusan-rate">0%</h3>
           <p>Rasio Kelulusan</p>
+        </div>
+      </div>
+
+      <div class="stat-card card-amber">
+        <div class="stat-icon"><i class="fa-solid fa-user-slash"></i></div>
+        <div class="stat-details">
+          <h3 id="stat-tidak-lulus-rate">0%</h3>
+          <p>Rasio Ketidaklulusan</p>
         </div>
       </div>
       

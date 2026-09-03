@@ -139,7 +139,7 @@ function setSyncStatus(status, message) {
 // Fetch data dari Firebase Firestore
 async function syncFromFirebase() {
   setSyncStatus('syncing');
-  showLoading(true, 'Menyinkan dengan Firebase...');
+  showLoading(true, 'Menyinkronkan dengan Firebase...');
   
   try {
     const snapshot = await db.collection('master_data').doc('pelatihan_db').get();
@@ -165,14 +165,44 @@ async function syncFromFirebase() {
       }
     } else {
       console.warn("Dokumen tidak ditemukan di Firebase, menggunakan data lokal.");
-      setSyncStatus('error', 'Data tidak ada di Firebase');
+      // Fallback ke data lokal tanpa memblokir user
+      loadLocalFallbackData();
+      setSyncStatus('error', 'Firebase kosong — data lokal aktif');
     }
   } catch (err) {
     console.error("Gagal menarik data dari Firebase:", err);
-    setSyncStatus('error', 'Gagal terhubung Firebase');
-    alert('Gagal mengambil data dari Firebase.\nDetail error: ' + err.message);
+    // Fallback ke data lokal tanpa alert yang mengganggu
+    loadLocalFallbackData();
+    setSyncStatus('error', 'Offline — data lokal aktif');
   } finally {
     showLoading(false);
+  }
+}
+
+// Fallback: muat data dari cache localStorage atau INITIAL_DATA dari data.js
+function loadLocalFallbackData() {
+  // Cek apakah sudah ada data di state (dari cache)
+  if (state.kegiatanList && state.kegiatanList.length > 0) {
+    // Sudah ada data dari cache, render saja
+    renderApp();
+    return;
+  }
+  
+  // Coba dari localStorage
+  const localDb = localStorage.getItem('pelatihan_db');
+  if (localDb) {
+    try {
+      state.kegiatanList = JSON.parse(localDb);
+      renderApp();
+      return;
+    } catch (e) { /* abaikan parsing error */ }
+  }
+  
+  // Fallback terakhir: INITIAL_DATA dari data.js
+  if (typeof INITIAL_DATA !== 'undefined' && Array.isArray(INITIAL_DATA) && INITIAL_DATA.length > 0) {
+    state.kegiatanList = INITIAL_DATA;
+    localStorage.setItem('pelatihan_db', JSON.stringify(INITIAL_DATA));
+    renderApp();
   }
 }
 
@@ -196,7 +226,7 @@ window.migrateToFirebase = async function() {
   }
 }
 
-// Load data saat pertama kali — langsung dari Sheets, localStorage sebagai fallback
+// Load data saat pertama kali — Firebase utama, localStorage/INITIAL_DATA sebagai fallback
 async function initData() {
   // Load document labels from localStorage first if available
   const localLabels = localStorage.getItem('document_labels');
@@ -206,30 +236,22 @@ async function initData() {
     } catch (e) {}
   }
 
-  if (APPS_SCRIPT_URL) {
-    const localDb = localStorage.getItem('pelatihan_db');
-    if (localDb) {
-      try {
-        state.kegiatanList = JSON.parse(localDb);
-        renderApp();
-      } catch (e) { /* abaikan error parsing cache */ }
-    }
-    await syncFromFirebase();
-
-  } else {
-    const localDb = localStorage.getItem('pelatihan_db');
-    if (localDb) {
-      try {
-        state.kegiatanList = JSON.parse(localDb);
-      } catch (e) {
-        state.kegiatanList = INITIAL_DATA;
-      }
-    } else {
-      state.kegiatanList = INITIAL_DATA;
-      localStorage.setItem('pelatihan_db', JSON.stringify(INITIAL_DATA));
-    }
+  // Langkah 1: Muat data dari cache localStorage terlebih dahulu agar tampilan langsung tampil
+  const localDb = localStorage.getItem('pelatihan_db');
+  if (localDb) {
+    try {
+      state.kegiatanList = JSON.parse(localDb);
+      renderApp();
+    } catch (e) { /* abaikan error parsing cache */ }
+  } else if (typeof INITIAL_DATA !== 'undefined' && Array.isArray(INITIAL_DATA) && INITIAL_DATA.length > 0) {
+    // Tidak ada cache, gunakan INITIAL_DATA dari data.js
+    state.kegiatanList = INITIAL_DATA;
+    localStorage.setItem('pelatihan_db', JSON.stringify(INITIAL_DATA));
     renderApp();
   }
+
+  // Langkah 2: Coba sync dari Firebase (akan update data jika berhasil, atau tetap data lokal jika gagal)
+  await syncFromFirebase();
 }
 
 async function saveToLocalStorage() {
@@ -377,15 +399,6 @@ function renderStatistics() {
         totalLulus += lulusNum;
       }
 
-      // Total Tidak Lulus — parsing angka dari field tidak_lulus
-      const tidakLulusRaw = ang.tidak_lulus;
-      if (tidakLulusRaw !== null && tidakLulusRaw !== undefined && tidakLulusRaw !== '' && tidakLulusRaw !== '-') {
-        const tlNum = parseInt(String(tidakLulusRaw).replace(/[^0-9]/g, ''));
-        if (!isNaN(tlNum)) {
-          totalTidakLulus += tlNum;
-        }
-      }
-
       // Documents completeness check
       Object.keys(DOCUMENT_LABELS).forEach(docKey => {
         totalDocSlots++;
@@ -396,7 +409,11 @@ function renderStatistics() {
     });
   });
 
+  // Total Tidak Lulus dihitung dari selisih Total Peserta dan Total Lulus agar statistik dashboard 100% sinkron
+  totalTidakLulus = Math.max(0, totalPeserta - totalLulus);
+
   const graduationRate = totalPeserta > 0 ? Math.round((totalLulus / totalPeserta) * 100) : 0;
+  const nonGraduationRate = totalPeserta > 0 ? (100 - graduationRate) : 0;
   const docCompletenessRate = totalDocSlots > 0 ? Math.round((availableDocs / totalDocSlots) * 100) : 0;
 
   document.getElementById('stat-total-kegiatan').innerText = totalKegiatan;
@@ -404,8 +421,16 @@ function renderStatistics() {
   document.getElementById('stat-total-peserta').innerText = totalPeserta.toLocaleString('id-ID');
   const elTotalLulus = document.getElementById('stat-total-lulus');
   if (elTotalLulus) elTotalLulus.innerText = totalLulus.toLocaleString('id-ID');
+  
   const elTotalTidakLulus = document.getElementById('stat-total-tidak-lulus');
   if (elTotalTidakLulus) elTotalTidakLulus.innerText = totalTidakLulus.toLocaleString('id-ID');
+  
+  const elTidakLulusPercentInline = document.getElementById('stat-tidak-lulus-percent-inline');
+  if (elTidakLulusPercentInline) elTidakLulusPercentInline.innerText = `(${nonGraduationRate}%)`;
+  
+  const elTidakLulusRate = document.getElementById('stat-tidak-lulus-rate');
+  if (elTidakLulusRate) elTidakLulusRate.innerText = `${nonGraduationRate}%`;
+
   document.getElementById('stat-kelulusan-rate').innerText = `${graduationRate}%`;
   document.getElementById('stat-dokumen-rate').innerText = `${docCompletenessRate}%`;
 }
@@ -512,7 +537,7 @@ function renderTable() {
 function getFilteredData() {
   const filtered = state.kegiatanList.filter(keg => {
     // 1. Search Query
-    const query = state.filters.search.toLowerCase().strip();
+    const query = state.filters.search.toLowerCase().trim();
     let matchesSearch = true;
 
     if (query !== '') {
